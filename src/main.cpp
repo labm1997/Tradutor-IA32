@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
 	//as_symbols.print();
 	ofstream ofile;
 	ofile.open(extractName + ".obj");
-	ofile << as.generateObjectCode(as_symbols, ppStatements);
+	ofile << as.translateIA32(as_symbols, ppStatements);
 	ofile.close();
 
 
