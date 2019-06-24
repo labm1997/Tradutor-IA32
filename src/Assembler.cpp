@@ -23,7 +23,7 @@ static std::map<std::string, Instruction> instructionMap = {
 		return "div dword [" + it.arg[0].op1 + "]\n";
 	})},
 	{"jmp", Instruction("jmp", 5, 2, 1, {NON}, [] (Statement it) -> std::string {
-		return "mul " + it.arg[0].op1 + "\n";
+		return "jmp " + it.arg[0].op1 + "\n";
 	})},
 	{"jmpn", Instruction("jmpn", 6, 2, 1, {NON}, [] (Statement it) -> std::string {
 		return "cmp eax,0\njl " + it.arg[0].op1 + "\n";
