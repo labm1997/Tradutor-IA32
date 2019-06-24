@@ -11,64 +11,64 @@
 
 static std::map<std::string, Instruction> instructionMap = {
 	{"add", Instruction("add", 1, 2, 1, {READ}, [] (Statement it) -> std::string {
-        return "add eax,[" + it.arg[0].op1 + "]\n";
+		return "add eax,[" + it.arg[0].op1 + "]\n";
 	})},
 	{"sub", Instruction("sub", 2, 2, 1, {READ}, [] (Statement it) -> std::string {
-        return "sub eax,[" + it.arg[0].op1 + "]\n";
+		return "sub eax,[" + it.arg[0].op1 + "]\n";
 	})},
 	{"mult", Instruction("mult", 3, 2, 1, {READ}, [] (Statement it) -> std::string {
-        return "mul dword [" + it.arg[0].op1 + "]\n";
+		return "mul dword [" + it.arg[0].op1 + "]\n";
 	})},
 	{"div", Instruction("div", 4, 2, 1, {READ}, [] (Statement it) -> std::string {
-        return "div dword [" + it.arg[0].op1 + "]\n";
+		return "div dword [" + it.arg[0].op1 + "]\n";
 	})},
 	{"jmp", Instruction("jmp", 5, 2, 1, {NON}, [] (Statement it) -> std::string {
-        return "mul " + it.arg[0].op1 + "\n";
+		return "mul " + it.arg[0].op1 + "\n";
 	})},
 	{"jmpn", Instruction("jmpn", 6, 2, 1, {NON}, [] (Statement it) -> std::string {
-        return "cmp eax,0\njl " + it.arg[0].op1 + "\n";
+		return "cmp eax,0\njl " + it.arg[0].op1 + "\n";
 	})},
 	{"jmpp", Instruction("jmpp", 7, 2, 1, {NON}, [] (Statement it) -> std::string {
-        return "cmp eax,0\njg " + it.arg[0].op1 + "\n";
+		return "cmp eax,0\njg " + it.arg[0].op1 + "\n";
 	})},
 	{"jmpz", Instruction("jmpz", 8, 2, 1, {NON}, [] (Statement it) -> std::string {
-        return "cmp eax,0\nje " + it.arg[0].op1 + "\n";
+		return "cmp eax,0\nje " + it.arg[0].op1 + "\n";
 	})},
 	{"copy", Instruction("copy", 9, 3, 2, {READ, WRITE}, [] (Statement it) -> std::string {
-        return "mov ebx,[" + it.arg[0].op1 + "]\nmov dword [" + it.arg[1].op1 + "],ebx\n";
+		return "mov ebx,[" + it.arg[0].op1 + "]\nmov dword [" + it.arg[1].op1 + "],ebx\n";
 	})},
 	{"load", Instruction("load", 10, 2, 1, {READ}, [] (Statement it) -> std::string {
-        return "mov eax,[" + it.arg[0].op1 + "]\n";
+		return "mov eax,[" + it.arg[0].op1 + "]\n";
 	})},
 	{"store", Instruction("store", 11, 2, 1, {WRITE}, [] (Statement it) -> std::string {
-        return "mov dword [" + it.arg[0].op1 + "],eax\n";
+		return "mov dword [" + it.arg[0].op1 + "],eax\n";
 	})},
 	{"input", Instruction("input", 12, 2, 1, {WRITE}, [] (Statement it) -> std::string {
-        return "push " + it.arg[0].op1 + "\ncall LerInteiro\n";
+		return "push " + it.arg[0].op1 + "\ncall LerInteiro\n";
 	})},
 	{"output", Instruction("output", 13, 2, 1, {READ}, [] (Statement it) -> std::string {
-        return "push dword [" + it.arg[0].op1 + "]\ncall EscreverInteiro\n";
+		return "push dword [" + it.arg[0].op1 + "]\ncall EscreverInteiro\n";
 	})},
 	{"c_input", Instruction("c_input", 15, 2, 1, {WRITE}, [] (Statement it) -> std::string {
-        return "push " + it.arg[0].op1 + "\ncall LerChar\n";
+		return "push " + it.arg[0].op1 + "\ncall LerChar\n";
 	})},
 	{"c_output", Instruction("c_output", 16, 2, 1, {READ}, [] (Statement it) -> std::string {
-        return "push dword [" + it.arg[0].op1 + "]\ncall EscreverChar\n";
+		return "push dword [" + it.arg[0].op1 + "]\ncall EscreverChar\n";
 	})},
 	{"h_input", Instruction("h_input", 17, 2, 1, {WRITE}, [] (Statement it) -> std::string {
-        return "push " + it.arg[0].op1 + "\ncall LerHexa\n";
+		return "push " + it.arg[0].op1 + "\ncall LerHexa\n";
 	})},
 	{"h_output", Instruction("h_output", 18, 2, 1, {READ}, [] (Statement it) -> std::string {
-        return "push dword [" + it.arg[0].op1 + "]\ncall EscreverHexa\n";
+		return "push dword [" + it.arg[0].op1 + "]\ncall EscreverHexa\n";
 	})},
 	{"s_input", Instruction("s_input", 19, 2, 2, {WRITE}, [] (Statement it) -> std::string {
-        return "push " + it.arg[0].op1 + "\npush dword [" + it.arg[1].op1 + "]\ncall LerString\n";
+		return "push " + it.arg[0].op1 + "\npush dword [" + it.arg[1].op1 + "]\ncall LerString\n";
 	})},
 	{"s_output", Instruction("s_output", 20, 2, 2, {READ}, [] (Statement it) -> std::string {
-        return "push " + it.arg[0].op1 + "\npush dword [" + it.arg[1].op1 + "]\ncall EscreverString\n";
+		return "push " + it.arg[0].op1 + "\npush dword [" + it.arg[1].op1 + "]\ncall EscreverString\n";
 	})},
 	{"stop", Instruction("stop", 14, 1, 0, {NON}, [] (Statement it) -> std::string {
-        return "mov eax,1\nmov ebx,0\nint 80h\n";
+		return "mov eax,1\nmov ebx,0\nint 80h\n";
 	})}
 };
 
@@ -266,7 +266,7 @@ std::string Assembler::mINSTRUCTION(SymbolTable ts, Statement it){
 			}
 		}
 
-        if(!it.label.empty()) out += it.label + ": ";
+		if(!it.label.empty()) out += it.label + ": ";
 		out += in.callback(it);
 
 	}
@@ -287,9 +287,9 @@ std::string Assembler::mSPACE(Statement it){
 
 	switch(it.arg[0].evalUnary(&nspaces)){
 		case EVAL_UNARY_OK:
-		    out += it.label + ": dd 0";
+			out += it.label + ": dd 0";
 			for(int i=1 ; i < nspaces ; i++) out += ",0";
-            out += "\n";
+			out += "\n";
 			this->address += nspaces;
 		break;
 		case EVAL_UNARY_ERROR_EMPTY:
@@ -373,6 +373,8 @@ std::string Assembler::translateIA32(SymbolTable ts, std::list<Statement> lstmt)
 
 	this->address = 0;
 	this->lineNumber = 1;
+	
+	out += "\%include \"ia32/io.asm\"\n";
 
 	for(Statement &it : lstmt){
 		// Instruction rendering
@@ -381,10 +383,10 @@ std::string Assembler::translateIA32(SymbolTable ts, std::list<Statement> lstmt)
 		// Directive
 		else {
 			if(it.op == "section"){
-			    out += "section ." + it.arg[0].op1 + "\n";
-			    if(it.arg[0].op1 == "text"){
-			        out += "global _start\n_start: ";
-			    }
+				out += "section ." + it.arg[0].op1 + "\n";
+				if(it.arg[0].op1 == "text"){
+					out += "global _start\n_start: ";
+				}
 			}
 			else if(it.op == "space")
 				out += this->mSPACE(it);
