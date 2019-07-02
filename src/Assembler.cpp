@@ -55,7 +55,7 @@ static std::map<std::string, Instruction> instructionMap = {
 		return "push " + it.arg[0].print() + "\ncall LerChar\n";
 	})},
 	{"c_output", Instruction("c_output", 16, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "push dword [" + it.arg[0].print() + "]\ncall EscreverChar\n";
+		return "push " + it.arg[0].print() + "\ncall EscreverChar\n";
 	})},
 	{"h_input", Instruction("h_input", 17, 2, 1, {WRITE}, [] (Statement it) -> std::string {
 		return "push " + it.arg[0].print() + "\ncall LerHexa\n";
