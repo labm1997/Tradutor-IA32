@@ -6,7 +6,14 @@
 #include <map>
 #include "log.hpp"
 
-// !TODO: Don't put numbers on TS!!!!
+std::string Expression::print(){
+	if(this->op2.empty()) return this->op1;
+	
+	long int offset;
+	if(strToInt(this->op2, &offset) == OK)
+		return this->op1 + "+" + std::to_string(4*offset);
+	return this->op1;
+}
 
 error_eval Expression::eval(SymbolTable ts, int *ret){
 	long int v_op1;

@@ -39,6 +39,7 @@ class Expression {
 	operation op;
 	error_eval eval(SymbolTable, int *);
 	error_evalUnary evalUnary(long int *);
+	std::string print();
 };
 
 class Statement {

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 #include "symbol.hpp"
 #include "statement.hpp"
 #include "Assembler.hpp"
@@ -11,64 +13,64 @@
 
 static std::map<std::string, Instruction> instructionMap = {
 	{"add", Instruction("add", 1, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "add eax,[" + it.arg[0].op1 + "]\n";
+		return "add eax,[" + it.arg[0].print() + "]\n";
 	})},
 	{"sub", Instruction("sub", 2, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "sub eax,[" + it.arg[0].op1 + "]\n";
+		return "sub eax,[" + it.arg[0].print() + "]\n";
 	})},
 	{"mult", Instruction("mult", 3, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "mul dword [" + it.arg[0].op1 + "]\n";
+		return "mul dword [" + it.arg[0].print() + "]\n";
 	})},
 	{"div", Instruction("div", 4, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "div dword [" + it.arg[0].op1 + "]\n";
+		return "div dword [" + it.arg[0].print() + "]\n";
 	})},
 	{"jmp", Instruction("jmp", 5, 2, 1, {NON}, [] (Statement it) -> std::string {
-		return "jmp " + it.arg[0].op1 + "\n";
+		return "jmp " + it.arg[0].print() + "\n";
 	})},
 	{"jmpn", Instruction("jmpn", 6, 2, 1, {NON}, [] (Statement it) -> std::string {
-		return "cmp eax,0\njl " + it.arg[0].op1 + "\n";
+		return "cmp eax,0\njl " + it.arg[0].print() + "\n";
 	})},
 	{"jmpp", Instruction("jmpp", 7, 2, 1, {NON}, [] (Statement it) -> std::string {
-		return "cmp eax,0\njg " + it.arg[0].op1 + "\n";
+		return "cmp eax,0\njg " + it.arg[0].print() + "\n";
 	})},
 	{"jmpz", Instruction("jmpz", 8, 2, 1, {NON}, [] (Statement it) -> std::string {
-		return "cmp eax,0\nje " + it.arg[0].op1 + "\n";
+		return "cmp eax,0\nje " + it.arg[0].print() + "\n";
 	})},
 	{"copy", Instruction("copy", 9, 3, 2, {READ, WRITE}, [] (Statement it) -> std::string {
-		return "mov ebx,[" + it.arg[0].op1 + "]\nmov dword [" + it.arg[1].op1 + "],ebx\n";
+		return "mov ebx,[" + it.arg[0].print() + "]\nmov dword [" + it.arg[1].op1 + "],ebx\n";
 	})},
 	{"load", Instruction("load", 10, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "mov eax,[" + it.arg[0].op1 + "]\n";
+		return "mov eax,[" + it.arg[0].print() + "]\n";
 	})},
 	{"store", Instruction("store", 11, 2, 1, {WRITE}, [] (Statement it) -> std::string {
-		return "mov dword [" + it.arg[0].op1 + "],eax\n";
+		return "mov dword [" + it.arg[0].print() + "],eax\n";
 	})},
 	{"input", Instruction("input", 12, 2, 1, {WRITE}, [] (Statement it) -> std::string {
-		return "push " + it.arg[0].op1 + "\ncall LerInteiro\n";
+		return "push " + it.arg[0].print() + "\ncall LerInteiro\n";
 	})},
 	{"output", Instruction("output", 13, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "push dword [" + it.arg[0].op1 + "]\ncall EscreverInteiro\n";
+		return "push dword [" + it.arg[0].print() + "]\ncall EscreverInteiro\n";
 	})},
 	{"c_input", Instruction("c_input", 15, 2, 1, {WRITE}, [] (Statement it) -> std::string {
-		return "push " + it.arg[0].op1 + "\ncall LerChar\n";
+		return "push " + it.arg[0].print() + "\ncall LerChar\n";
 	})},
 	{"c_output", Instruction("c_output", 16, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "push dword [" + it.arg[0].op1 + "]\ncall EscreverChar\n";
+		return "push dword [" + it.arg[0].print() + "]\ncall EscreverChar\n";
 	})},
 	{"h_input", Instruction("h_input", 17, 2, 1, {WRITE}, [] (Statement it) -> std::string {
-		return "push " + it.arg[0].op1 + "\ncall LerHexa\n";
+		return "push " + it.arg[0].print() + "\ncall LerHexa\n";
 	})},
 	{"h_output", Instruction("h_output", 18, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "push dword [" + it.arg[0].op1 + "]\ncall EscreverHexa\n";
+		return "push dword [" + it.arg[0].print() + "]\ncall EscreverHexa\n";
 	})},
 	{"s_input", Instruction("s_input", 19, 2, 2, {WRITE}, [] (Statement it) -> std::string {
-		return "push " + it.arg[0].op1 + "\npush dword [" + it.arg[1].op1 + "]\ncall LerString\n";
+		return "push " + it.arg[0].print() + "\npush dword [" + it.arg[1].op1 + "]\ncall LerString\n";
 	})},
 	{"s_output", Instruction("s_output", 20, 2, 2, {READ}, [] (Statement it) -> std::string {
-		return "push " + it.arg[0].op1 + "\npush dword [" + it.arg[1].op1 + "]\ncall EscreverString\n";
+		return "push " + it.arg[0].print() + "\npush dword [" + it.arg[1].op1 + "]\ncall EscreverString\n";
 	})},
 	{"stop", Instruction("stop", 14, 1, 0, {NON}, [] (Statement it) -> std::string {
-		return "mov eax,1\nmov ebx,0\nint 80h\n";
+		return "mov eax,1\nmov ebx,0\nint 128\n";
 	})}
 };
 
@@ -374,7 +376,13 @@ std::string Assembler::translateIA32(SymbolTable ts, std::list<Statement> lstmt)
 	this->address = 0;
 	this->lineNumber = 1;
 	
-	out += "\%include \"ia32/io.asm\"\n";
+	// Append file with libraries to output
+	std::ifstream iofile;
+	std::stringstream filestream;
+	iofile.open("ia32/io.asm");
+	filestream << iofile.rdbuf();
+	out += filestream.str();
+	iofile.close();
 
 	for(Statement &it : lstmt){
 		// Instruction rendering
