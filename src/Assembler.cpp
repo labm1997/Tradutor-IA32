@@ -375,14 +375,6 @@ std::string Assembler::translateIA32(SymbolTable ts, std::list<Statement> lstmt)
 
 	this->address = 0;
 	this->lineNumber = 1;
-	
-	// Append file with libraries to output
-	std::ifstream iofile;
-	std::stringstream filestream;
-	iofile.open("ia32/io.asm");
-	filestream << iofile.rdbuf();
-	out += filestream.str();
-	iofile.close();
 
 	for(Statement &it : lstmt){
 		// Instruction rendering
@@ -404,6 +396,15 @@ std::string Assembler::translateIA32(SymbolTable ts, std::list<Statement> lstmt)
 
 		this->lineNumber++;
 	}
+	
+	// Append file with libraries to output
+	out += "section .text\n";
+	std::ifstream iofile;
+	std::stringstream filestream;
+	iofile.open("ia32/io.asm");
+	filestream << iofile.rdbuf();
+	out += filestream.str();
+	iofile.close();
 
 	return out;
 }
