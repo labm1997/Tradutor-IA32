@@ -23,3 +23,7 @@ Execute o comando:
 `./assembler path/to/file.asm`
 
 A saída será `path/to/file.s`
+
+### Biblioteca de IO
+
+O arquivo `ia32/io.asm` é a implementação da biblioteca de IO em assembly IA-32 usando chamadas de sistema ao kernel do Linux.
