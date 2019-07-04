@@ -1,27 +1,77 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 #include "symbol.hpp"
 #include "statement.hpp"
 #include "Assembler.hpp"
 #include "instruction.hpp"
 #include "log.hpp"
 
+
+
 static std::map<std::string, Instruction> instructionMap = {
-	{"add", Instruction("add", 1, 2, 1, {READ})},
-	{"sub", Instruction("sub", 2, 2, 1, {READ})},
-	{"mult", Instruction("mult", 3, 2, 1, {READ})},
-	{"div", Instruction("div", 4, 2, 1, {READ})},
-	{"jmp", Instruction("jmp", 5, 2, 1, {NON})},
-	{"jmpn", Instruction("jmpn", 6, 2, 1, {NON})},
-	{"jmpp", Instruction("jmpp", 7, 2, 1, {NON})},
-	{"jmpz", Instruction("jmpz", 8, 2, 1, {NON})},
-	{"copy", Instruction("copy", 9, 3, 2, {READ, WRITE})},
-	{"load", Instruction("load", 10, 2, 1, {READ})},
-	{"store", Instruction("store", 11, 2, 1, {WRITE})},
-	{"input", Instruction("input", 12, 2, 1, {WRITE})},
-	{"output", Instruction("output", 13, 2, 1, {READ})},
-	{"stop", Instruction("stop", 14, 1, 0, {NON})}
+	{"add", Instruction("add", 1, 2, 1, {READ}, [] (Statement it) -> std::string {
+		return "add eax,[" + it.arg[0].print() + "]\n";
+	})},
+	{"sub", Instruction("sub", 2, 2, 1, {READ}, [] (Statement it) -> std::string {
+		return "sub eax,[" + it.arg[0].print() + "]\n";
+	})},
+	{"mult", Instruction("mult", 3, 2, 1, {READ}, [] (Statement it) -> std::string {
+		return "mul dword [" + it.arg[0].print() + "]\n";
+	})},
+	{"div", Instruction("div", 4, 2, 1, {READ}, [] (Statement it) -> std::string {
+		return "cdq\nidiv dword [" + it.arg[0].print() + "]\n";
+	})},
+	{"jmp", Instruction("jmp", 5, 2, 1, {NON}, [] (Statement it) -> std::string {
+		return "jmp " + it.arg[0].print() + "\n";
+	})},
+	{"jmpn", Instruction("jmpn", 6, 2, 1, {NON}, [] (Statement it) -> std::string {
+		return "cmp eax,0\njl " + it.arg[0].print() + "\n";
+	})},
+	{"jmpp", Instruction("jmpp", 7, 2, 1, {NON}, [] (Statement it) -> std::string {
+		return "cmp eax,0\njg " + it.arg[0].print() + "\n";
+	})},
+	{"jmpz", Instruction("jmpz", 8, 2, 1, {NON}, [] (Statement it) -> std::string {
+		return "cmp eax,0\nje " + it.arg[0].print() + "\n";
+	})},
+	{"copy", Instruction("copy", 9, 3, 2, {READ, WRITE}, [] (Statement it) -> std::string {
+		return "mov ebx,[" + it.arg[0].print() + "]\nmov dword [" + it.arg[1].op1 + "],ebx\n";
+	})},
+	{"load", Instruction("load", 10, 2, 1, {READ}, [] (Statement it) -> std::string {
+		return "mov eax,[" + it.arg[0].print() + "]\n";
+	})},
+	{"store", Instruction("store", 11, 2, 1, {WRITE}, [] (Statement it) -> std::string {
+		return "mov dword [" + it.arg[0].print() + "],eax\n";
+	})},
+	{"input", Instruction("input", 12, 2, 1, {WRITE}, [] (Statement it) -> std::string {
+		return "push " + it.arg[0].print() + "\ncall LerInteiro\n";
+	})},
+	{"output", Instruction("output", 13, 2, 1, {READ}, [] (Statement it) -> std::string {
+		return "push dword [" + it.arg[0].print() + "]\ncall EscreverInteiro\n";
+	})},
+	{"c_input", Instruction("c_input", 15, 2, 1, {WRITE}, [] (Statement it) -> std::string {
+		return "push " + it.arg[0].print() + "\ncall LerChar\n";
+	})},
+	{"c_output", Instruction("c_output", 16, 2, 1, {READ}, [] (Statement it) -> std::string {
+		return "push " + it.arg[0].print() + "\ncall EscreverChar\n";
+	})},
+	{"h_input", Instruction("h_input", 17, 2, 1, {WRITE}, [] (Statement it) -> std::string {
+		return "push " + it.arg[0].print() + "\ncall LerHexa\n";
+	})},
+	{"h_output", Instruction("h_output", 18, 2, 1, {READ}, [] (Statement it) -> std::string {
+		return "push dword [" + it.arg[0].print() + "]\ncall EscreverHexa\n";
+	})},
+	{"s_input", Instruction("s_input", 19, 2, 2, {WRITE}, [] (Statement it) -> std::string {
+		return "push " + it.arg[0].print() + "\npush dword " + it.arg[1].op1 + "\ncall LerString\n";
+	})},
+	{"s_output", Instruction("s_output", 20, 2, 2, {READ}, [] (Statement it) -> std::string {
+		return "push " + it.arg[0].print() + "\npush dword " + it.arg[1].op1 + "\ncall EscreverString\n";
+	})},
+	{"stop", Instruction("stop", 14, 1, 0, {NON}, [] (Statement it) -> std::string {
+		return "mov eax,1\nmov ebx,0\nint 128\n";
+	})}
 };
 
 void Assembler::addLabel(SymbolTable *ts, Statement it){
@@ -179,7 +229,7 @@ std::string Assembler::mINSTRUCTION(SymbolTable ts, Statement it){
 
 	in = instructionMap[it.op];
 	nargs_stmt = it.countArgs();
-	out += std::to_string(in.opcode) + " ";
+	//out += std::to_string(in.opcode) + " ";
 	this->address += instructionMap[it.op].size;
 
 	if(in.nargs == nargs_stmt){
@@ -205,7 +255,6 @@ std::string Assembler::mINSTRUCTION(SymbolTable ts, Statement it){
 							logSemanticError("Jump out of TEXT section", this->lineNumber, it.lineDefinition, it.lineNumber);
 						}
 					}
-					out += std::to_string(arg) + " ";
 				break;
 				case EVAL_ERROR_CONVERTION:
 					logSyntaxError("Expected integer, label given as second operand", this->lineNumber, it.lineDefinition, it.lineNumber);
@@ -218,6 +267,9 @@ std::string Assembler::mINSTRUCTION(SymbolTable ts, Statement it){
 				break;
 			}
 		}
+
+		if(!it.label.empty()) out += it.label + ": ";
+		out += in.callback(it);
 
 	}
 	else {
@@ -237,11 +289,13 @@ std::string Assembler::mSPACE(Statement it){
 
 	switch(it.arg[0].evalUnary(&nspaces)){
 		case EVAL_UNARY_OK:
-			for(int i=0 ; i < nspaces ; i++) out += "00 ";
+			out += it.label + ": dd 0";
+			for(int i=1 ; i < nspaces ; i++) out += ",0";
+			out += "\n";
 			this->address += nspaces;
 		break;
 		case EVAL_UNARY_ERROR_EMPTY:
-			out += "00 ";
+			out += it.label + ": dd 0\n";
 			this->address += 1;
 		break;
 		default:
@@ -266,7 +320,7 @@ std::string Assembler::mCONST(Statement it){
 
 		switch(it.arg[0].evalUnary(&value)){
 			case EVAL_UNARY_OK:
-				out += std::to_string(value) + " ";
+				out += it.label + ": dd " + std::to_string(value) + "\n";
 			break;
 			case EVAL_UNARY_ERROR_EMPTY:
 				logInternalError(this->lineNumber, it.lineDefinition, it.lineNumber);
@@ -312,6 +366,45 @@ std::string Assembler::generateObjectCode(SymbolTable ts, std::list<Statement> l
 		this->lineNumber++;
 		
 	}
+
+	return out;
+}
+
+std::string Assembler::translateIA32(SymbolTable ts, std::list<Statement> lstmt){
+	std::string out;
+
+	this->address = 0;
+	this->lineNumber = 1;
+
+	for(Statement &it : lstmt){
+		// Instruction rendering
+		if(instructionMap.count(it.op) > 0)
+			out += this->mINSTRUCTION(ts, it);
+		// Directive
+		else {
+			if(it.op == "section"){
+				out += "section ." + it.arg[0].op1 + "\n";
+				if(it.arg[0].op1 == "text"){
+					out += "global _start\n_start: ";
+				}
+			}
+			else if(it.op == "space")
+				out += this->mSPACE(it);
+			else if(it.op == "const")
+				out += this->mCONST(it);
+		}
+
+		this->lineNumber++;
+	}
+	
+	// Append file with libraries to output
+	out += "section .text\n";
+	std::ifstream iofile;
+	std::stringstream filestream;
+	iofile.open("ia32/io.asm");
+	filestream << iofile.rdbuf();
+	out += filestream.str();
+	iofile.close();
 
 	return out;
 }

@@ -36,6 +36,7 @@ class Assembler {
 	public:
 	SymbolTable generateSymbolTable(std::list<Statement>);
 	std::string generateObjectCode(SymbolTable, std::list<Statement>);
+	std::string translateIA32(SymbolTable, std::list<Statement>);
 	bool validDataAddress(long int);
 	bool validReadAddress(long int);
 
