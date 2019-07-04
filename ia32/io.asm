@@ -45,6 +45,19 @@ EscreverNum: push ebp
 mov ebp,esp
 push eax
 push ebx
+push 0
+cmp dword [ebp+8],0
+jge writeloop
+cmp dword [ebp+12],10
+jne writeloop
+mov eax,4
+mov ebx,1
+push 45
+mov ecx,esp
+mov edx,1
+int 80h
+add esp,4
+neg dword [ebp+8]
 writeloop: cmp dword [ebp+16],0
 je endwriteloop
 mov eax,[ebp+8]
@@ -57,26 +70,38 @@ jl isnumber
 add eax,57h
 jmp endnumber
 isnumber: add eax,30h
-endnumber: mov dword [ebp-16],eax
+endnumber: 
+cmp eax,30h
+jg naoZero
+cmp dword [ebp+16],1
+je print
+cmp dword [ebp-12],0
+je endprint
+jmp print
+naoZero:
+mov dword [ebp-12],1
+print:
+mov dword [ebp-16],eax
 mov eax,4
 mov ebx,1
 mov ecx,ebp
 sub ecx,16
 mov edx,1
 int 128
-add esp,4
+endprint: add esp,4
 mov eax,[ebp+16]
 mov edx,0
 div dword [ebp+12]
 mov dword [ebp+16],eax
 jmp writeloop
-endwriteloop: add esp,4
+endwriteloop:
 push 0x0a
 mov eax,4
 mov ebx,1
 mov ecx,esp
 mov edx,1
 int 128
+add esp,8
 pop ebx
 pop eax
 pop ebp
@@ -137,3 +162,65 @@ pop eax
 add esp,12
 pop ebp
 ret 8
+LerString:
+
+    push ebp            ;frame de pilha, salva antigo ebp
+    mov ebp,esp
+	push eax
+	push ebx
+
+ler:cmp dword [ebp+8],0
+	jle endler
+    mov eax,3           ;chamada de sistema para leitura de char
+    mov ebx,0
+    mov ecx,[ebp + 12]  ;salva char lido no espaço que foi empilhado antes do call
+    mov edx,1          
+    int 128             ;Chamada de sistema
+	mov eax,[ebp + 12]
+    cmp dword [eax],0ah
+    je endler
+    add dword [ebp + 12],4
+    dec dword [ebp+8]
+    jmp ler
+endler:
+	pop ebx
+	pop eax
+    pop ebp             ;retorna valor antigo de ebp
+    ret 8               ;retorna limpando o parâmetro 
+
+
+EscreverString:
+
+    push ebp            ;frame de pilha, salva antigo ebp
+    mov ebp,esp      
+	push eax
+	push ebx
+
+escrever:
+	cmp dword [ebp+8],0
+	jle endescrever
+	mov eax,[ebp + 12]
+    cmp dword [eax],0ah
+    je endescrever
+    mov eax,4           ;chamada de sistema para leitura de char
+    mov ebx,0
+    mov ecx,[ebp + 12]  ;salva char lido no espaço que foi empilhado antes do call
+    mov edx,1          
+    int 128             ;Chamada de sistema
+    add dword [ebp + 12],4
+    dec dword [ebp+8]
+    jmp escrever
+endescrever:
+    dec esp
+    mov byte [esp],10
+    mov eax,4           ;chamada de sistema para escrita de do /n
+    mov ebx,0
+    mov ecx,esp         ;imprimir char no espaço que foi empilhado antes do calls
+    mov edx,1           ;escrever apenas um único char
+    int 128             ;Chamada de sistema
+    inc esp
+    
+	pop ebx
+	pop eax
+    pop ebp             ;retorna valor antigo de ebp
+    ret 8               ;retorna limpando o parâmetro

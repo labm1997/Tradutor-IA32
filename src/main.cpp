@@ -46,18 +46,13 @@ int main(int argc, char** argv) {
 	string fileName = argv[1];
 	size_t position = fileName.find(".");
 	string extractName = (string::npos == position)? fileName : fileName.substr(0, position);
-
-	ofstream ppfile;
-	ppfile.open(extractName + ".pre");
-	ppfile << Statement::renderStatementList(ppStatements);
-	ppfile.close();
 	
 	
 	as_symbols = as.generateSymbolTable(ppStatements);
 
 	//as_symbols.print();
 	ofstream ofile;
-	ofile.open(extractName + ".obj");
+	ofile.open(extractName + ".s");
 	ofile << as.translateIA32(as_symbols, ppStatements);
 	ofile.close();
 

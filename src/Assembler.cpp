@@ -22,7 +22,7 @@ static std::map<std::string, Instruction> instructionMap = {
 		return "mul dword [" + it.arg[0].print() + "]\n";
 	})},
 	{"div", Instruction("div", 4, 2, 1, {READ}, [] (Statement it) -> std::string {
-		return "mov edx,0\ndiv dword [" + it.arg[0].print() + "]\n";
+		return "cdq\nidiv dword [" + it.arg[0].print() + "]\n";
 	})},
 	{"jmp", Instruction("jmp", 5, 2, 1, {NON}, [] (Statement it) -> std::string {
 		return "jmp " + it.arg[0].print() + "\n";
@@ -64,10 +64,10 @@ static std::map<std::string, Instruction> instructionMap = {
 		return "push dword [" + it.arg[0].print() + "]\ncall EscreverHexa\n";
 	})},
 	{"s_input", Instruction("s_input", 19, 2, 2, {WRITE}, [] (Statement it) -> std::string {
-		return "push " + it.arg[0].print() + "\npush dword [" + it.arg[1].op1 + "]\ncall LerString\n";
+		return "push " + it.arg[0].print() + "\npush dword " + it.arg[1].op1 + "\ncall LerString\n";
 	})},
 	{"s_output", Instruction("s_output", 20, 2, 2, {READ}, [] (Statement it) -> std::string {
-		return "push " + it.arg[0].print() + "\npush dword [" + it.arg[1].op1 + "]\ncall EscreverString\n";
+		return "push " + it.arg[0].print() + "\npush dword " + it.arg[1].op1 + "\ncall EscreverString\n";
 	})},
 	{"stop", Instruction("stop", 14, 1, 0, {NON}, [] (Statement it) -> std::string {
 		return "mov eax,1\nmov ebx,0\nint 128\n";
