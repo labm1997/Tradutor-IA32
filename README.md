@@ -27,3 +27,7 @@ A saída será `path/to/file.s`
 ### Biblioteca de IO
 
 O arquivo `ia32/io.asm` é a implementação da biblioteca de IO em assembly IA-32 usando chamadas de sistema ao kernel do Linux.
+
+### Pequeno teste
+
+O arquivo `test/teste.asm` contém um pequeno teste usando assembly inventado para ser traduzido a assembly IA-32
