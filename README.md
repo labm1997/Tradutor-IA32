@@ -20,7 +20,7 @@ Execute o comando:
 ### Execução
 
 Execute o comando:
-`./assembler path/to/file.asm`
+`./tradutor path/to/file.asm`
 
 A saída será `path/to/file.s`
 
